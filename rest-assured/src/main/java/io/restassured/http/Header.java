@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package io.restassured.http;
 
 import io.restassured.internal.NameAndValue;
-import io.restassured.internal.assertion.AssertParameter;
+import io.restassured.internal.common.assertion.AssertParameter;
 
 /**
  * Represents a HTTP header
@@ -59,8 +59,9 @@ public class Header implements NameAndValue {
 
         Header header = (Header) o;
 
-        if (name != null ? !name.equals(header.name) : header.name != null) return false;
-        if (value != null ? !value.equals(header.value) : header.value != null) return false;
+        // HTTP header names are always case-insensitive. Values are usually case-insensitive.
+        if (name != null ? !name.equalsIgnoreCase(header.name) : header.name != null) return false;
+        if (value != null ? !value.equalsIgnoreCase(header.value) : header.value != null) return false;
 
         return true;
     }

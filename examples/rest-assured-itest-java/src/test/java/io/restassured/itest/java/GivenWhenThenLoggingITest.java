@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package io.restassured.itest.java;
 
 import io.restassured.config.LogConfig;
-import io.restassured.itest.java.support.WithJetty;
 import io.restassured.config.RestAssuredConfig;
+import io.restassured.itest.java.support.WithJetty;
 import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.Test;
 
@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class GivenWhenThenLoggingITest extends WithJetty {
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
     public void logsEverythingResponseUsingGivenWhenThenSyntax() throws Exception {
@@ -47,7 +46,12 @@ public class GivenWhenThenLoggingITest extends WithJetty {
                 log().all().
                 body("fullName", equalTo("John Doe"));
 
-        assertThat(writer.toString(), equalTo("HTTP/1.1 200 OK\nContent-Type: application/json;charset=utf-8\nContent-Length: 59\nServer: Jetty(9.3.2.v20150730)\n\n{\"firstName\":\"John\",\"lastName\":\"Doe\",\"fullName\":\"John Doe\"}" + LINE_SEPARATOR));
+        assertThat(writer.toString(), equalTo(String.format("HTTP/1.1 200 OK%n" +
+                "Content-Type: application/json;charset=utf-8%n" +
+                "Content-Length: 59%n" +
+                "Server: Jetty(9.3.2.v20150730)%n" +
+                "%n" +
+                "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"fullName\":\"John Doe\"}%n")));
     }
 
     @Test
@@ -61,7 +65,7 @@ public class GivenWhenThenLoggingITest extends WithJetty {
         then().
                 log().cookies().
                 body(equalTo("OK"));
-        assertThat(writer.toString(), allOf(startsWith("cookie1=cookieValue1;Domain=localhost\ncookie1=cookieValue2;Comment=\"My Purpose\";Path=/;Domain=localhost;Max-Age=1234567;Secure;Expires="), endsWith(";Version=1" + LINE_SEPARATOR)));
+        assertThat(writer.toString(), allOf(startsWith("cookie1=cookieValue1;Domain=localhost\ncookie1=cookieValue2;Comment=\"My Purpose\";Path=/;Domain=localhost;Max-Age=1234567;Secure;Expires="), endsWith(String.format(";Version=1%n"))));
     }
 
     @Test
@@ -80,6 +84,8 @@ public class GivenWhenThenLoggingITest extends WithJetty {
                 body("fullName", equalTo("John Doe"));
 
 
-        assertThat(writer.toString(), equalTo("Content-Type: application/json;charset=utf-8\nContent-Length: 59\nServer: Jetty(9.3.2.v20150730)" + LINE_SEPARATOR));
+        assertThat(writer.toString(), equalTo(String.format("Content-Type: application/json;charset=utf-8%n" +
+                "Content-Length: 59%n" +
+                "Server: Jetty(9.3.2.v20150730)%n")));
     }
 }

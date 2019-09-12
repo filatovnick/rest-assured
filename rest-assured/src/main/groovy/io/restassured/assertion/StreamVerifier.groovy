@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package io.restassured.assertion
 import io.restassured.internal.ResponseParserRegistrar
 import io.restassured.internal.http.ContentTypeExtractor
 import io.restassured.internal.path.json.JSONAssertion
+import io.restassured.internal.path.xml.XMLAssertion
 import io.restassured.parsing.Parser
 import io.restassured.response.Response
 

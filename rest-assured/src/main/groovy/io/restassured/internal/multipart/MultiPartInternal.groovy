@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package io.restassured.internal.multipart
 
+import groovy.transform.Canonical
 import io.restassured.internal.NoParameterValue
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.InputStreamBody
@@ -22,8 +23,10 @@ import org.apache.http.entity.mime.content.StringBody
 
 import java.nio.charset.Charset
 
+@Canonical
 class MultiPartInternal {
-  private static final String OCTET_STREAM = "application/octet-stream"
+
+	public static final String OCTET_STREAM = "application/octet-stream"
   private static final String TEXT_PLAIN = "text/plain"
 
   def content
@@ -31,6 +34,7 @@ class MultiPartInternal {
   def String fileName
   def String mimeType
   def String charset
+  def Map<String, String> headers = [:]
 
   def getContentBody() {
     if (content instanceof NoParameterValue) {

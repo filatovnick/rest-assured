@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,23 @@ public class LoggingIfValidationFailsTest {
 
             fail("Should throw AssertionError");
         } catch (AssertionError e) {
-            assertThat(writer.toString(), equalTo("Request method:\tPOST\nRequest URI:\thttp://localhost:8080/greetingPost\nProxy:\t\t\t<none>\nRequest params:\tname=Johan\nQuery params:\t<none>\nForm params:\t<none>\nPath params:\t<none>\nHeaders:\t\tContent-Type=application/x-www-form-urlencoded;charset="+ RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset()+"\nCookies:\t\t<none>\nMultiparts:\t\t<none>\nBody:\t\t\t<none>\n\n"+"" +
-                    "200\nContent-Type: application/json;charset=UTF-8\n\n{\n    \"id\": 1,\n    \"content\": \"Hello, Johan!\"\n}\n"));
+            assertThat(writer.toString(), equalTo(String.format("Request method:\tPOST%n" +
+                            "Request URI:\thttp://localhost:8080/greetingPost%n" +
+                            "Proxy:\t\t\t<none>%n" +
+                            "Request params:\tname=Johan%n" +
+                            "Query params:\t<none>%n" +
+                            "Form params:\t<none>%n" +
+                            "Path params:\t<none>%n" +
+                            "Headers:\t\tContent-Type=application/x-www-form-urlencoded;charset=%s%n" +
+                            "Cookies:\t\t<none>%n" +
+                            "Multiparts:\t\t<none>" +
+                            "%nBody:\t\t\t<none>%n" +
+                            "%n" +
+                            "200%n" +
+                            "Content-Type: application/json;charset=UTF-8%n" +
+                            "%n" +
+                            "{\n    \"id\": 1,\n    \"content\": \"Hello, Johan!\"\n}%n",
+                    RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset())));
         }
     }
 
@@ -90,8 +105,10 @@ public class LoggingIfValidationFailsTest {
 
             fail("Should throw AssertionError");
         } catch (AssertionError e) {
-            assertThat(writer.toString(), equalTo("Headers:\t\tContent-Type=application/x-www-form-urlencoded;charset="+ RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset()+"\n\n" +
-                    "Content-Type: application/json;charset=UTF-8\n"));
+            assertThat(writer.toString(), equalTo(String.format("Headers:\t\tContent-Type=application/x-www-form-urlencoded;charset=%s%n" +
+                            "%n" +
+                            "Content-Type: application/json;charset=UTF-8%n",
+                    RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset())));
         }
     }
 
@@ -118,7 +135,11 @@ public class LoggingIfValidationFailsTest {
 
             fail("Should throw AssertionError");
         } catch (AssertionError e) {
-            assertThat(writer.toString(), equalTo("Headers:\t\tApi-Key=1234\n\t\t\t\tContent-Type=application/x-www-form-urlencoded;charset="+ RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset()+"\n\nContent-Type: application/json;charset=UTF-8\n"));
+            assertThat(writer.toString(), equalTo(String.format("Headers:\t\tApi-Key=1234%n" +
+                            "\t\t\t\tContent-Type=application/x-www-form-urlencoded;charset=%s%n" +
+                            "%n" +
+                            "Content-Type: application/json;charset=UTF-8%n",
+                    RestAssuredMockMvcConfig.config().getEncoderConfig().defaultContentCharset())));
         }
     }
 
@@ -135,7 +156,7 @@ public class LoggingIfValidationFailsTest {
                 body("id", equalTo(1)).
                 body("content", equalTo("Hello, Johan!"));
 
-        assertThat(writer.toString(), isEmptyString());
+        assertThat(writer.toString(), emptyString());
     }
 
     @Test public void
@@ -155,7 +176,7 @@ public class LoggingIfValidationFailsTest {
                         build());
             fail("Should throw AssertionError");
         } catch (AssertionError e) {
-            assertThat(writer.toString(), not(isEmptyOrNullString()));
+            assertThat(writer.toString(), not(emptyOrNullString()));
         }
     }
 }

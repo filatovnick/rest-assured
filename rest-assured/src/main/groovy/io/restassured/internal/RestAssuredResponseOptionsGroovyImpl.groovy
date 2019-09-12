@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package io.restassured.internal
 
 import groovy.xml.StreamingMarkupBuilder
 import io.restassured.assertion.CookieMatcher
+import io.restassured.common.mapper.DataToDeserialize
+import io.restassured.common.mapper.TypeRef
 import io.restassured.config.DecoderConfig
 import io.restassured.config.RestAssuredConfig
 import io.restassured.filter.log.LogDetail
@@ -33,7 +35,6 @@ import io.restassured.internal.mapping.ObjectMapping
 import io.restassured.internal.print.ResponsePrinter
 import io.restassured.internal.support.CloseHTTPClientConnectionInputStreamWrapper
 import io.restassured.internal.support.Prettifier
-import io.restassured.mapper.DataToDeserialize
 import io.restassured.mapper.ObjectMapper
 import io.restassured.mapper.ObjectMapperDeserializationContext
 import io.restassured.mapper.ObjectMapperType
@@ -51,9 +52,9 @@ import java.lang.reflect.Type
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
-import static JsonPathConfig.jsonPathConfig
-import static XmlPathConfig.xmlPathConfig
-import static io.restassured.internal.assertion.AssertParameter.notNull
+import static io.restassured.internal.common.assertion.AssertParameter.notNull
+import static io.restassured.path.json.config.JsonPathConfig.jsonPathConfig
+import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase
 import static org.apache.commons.lang3.StringUtils.isBlank
 
@@ -233,6 +234,11 @@ or you can specify an explicit ObjectMapper using as($cls, <ObjectMapper>);""")
     notNull mapper, "Object mapper"
     def ctx = createObjectMapperDeserializationContext(cls)
     return mapper.deserialize(ctx) as T
+  }
+
+  def <T> T "as"(TypeRef<T> typeRef, ResponseBodyData responseBodyData) {
+    notNull typeRef, "Type ref"
+    return "as"(typeRef.getType(), responseBodyData)
   }
 
   def String findCharset() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,8 @@ public class PutTest {
                 log().all().
                 statusCode(415);
 
-        assertThat(writer.toString(), equalTo("415 Content type 'null' not supported\nAccept: application/x-www-form-urlencoded\n"));
+        assertThat(writer.toString(), equalTo(String.format("415 Content type 'null' not supported%n" +
+                "Accept: application/x-www-form-urlencoded%n")));
     }
 
     @Test public void

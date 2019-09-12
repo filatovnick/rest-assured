@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.apache.http.message.BasicHeader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,18 +78,21 @@ public class CookieFilter implements Filter {
         final Response response = ctx.next(requestSpec, responseSpec);
 
         List<Cookie> responseCookies = extractResponseCookies(response, cookieOrigin);
-        cookieStore.addCookies(responseCookies.toArray(new Cookie[responseCookies.size()]));
+        cookieStore.addCookies(responseCookies.toArray(new Cookie[0]));
         return response;
     }
 
     private List<Cookie> extractResponseCookies(Response response, CookieOrigin cookieOrigin) {
 
-        Header setCookieHeader = new BasicHeader("Set-Cookie", response.getHeader("Set-Cookie"));
-        try {
-            return cookieSpec.parse(setCookieHeader, cookieOrigin);
-        } catch (MalformedCookieException e) {
-            return Collections.emptyList();
+        List<Cookie> cookies = new ArrayList<Cookie>();
+        for (String cookieValue : response.getHeaders().getValues("Set-Cookie")) {
+            Header setCookieHeader = new BasicHeader("Set-Cookie", cookieValue);
+            try {
+                cookies.addAll(cookieSpec.parse(setCookieHeader, cookieOrigin));
+            } catch (MalformedCookieException ignored) {
+            }
         }
+        return cookies;
     }
 
     private CookieOrigin cookieOriginFromUri(String uri) {

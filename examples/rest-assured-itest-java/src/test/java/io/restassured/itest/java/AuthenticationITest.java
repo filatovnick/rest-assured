@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 
 import static io.restassured.RestAssured.*;
+import static io.restassured.authentication.FormAuthConfig.formAuthConfig;
 import static io.restassured.config.SessionConfig.sessionConfig;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -112,7 +113,7 @@ public class AuthenticationITest extends WithJetty {
     @Test
     public void formAuthenticationWithAutoFormDetailsAndAutoCsrfDetection() throws Exception {
         given().
-                auth().form("John", "Doe", FormAuthConfig.formAuthConfig().withAutoDetectionOfCsrf()).
+                auth().form("John", "Doe", formAuthConfig().withAutoDetectionOfCsrf()).
         when().
                 get("/formAuthCsrf").
         then().
@@ -143,6 +144,17 @@ public class AuthenticationITest extends WithJetty {
     }
 
     @Test
+    public void formAuthenticationWithAdditionalFields() {
+        given().
+                auth().form("John", "Doe", formAuthConfig().withAdditionalFields("smquerydata", "smauthreason", "smagentname").withAdditionalField("postpreservationdata")).
+        when().
+                get("/formAuthAdditionalFields").
+        then().
+                statusCode(200).
+                body(equalTo("OK"));
+    }
+
+    @Test
     public void formAuthenticationWithCsrfAutoDetectionButSpecifiedFormDetails() throws Exception {
         given().
                 auth().form("John", "Doe", new FormAuthConfig("j_spring_security_check_with_csrf", "j_username", "j_password").withAutoDetectionOfCsrf()).
@@ -166,7 +178,25 @@ public class AuthenticationITest extends WithJetty {
                 statusCode(200).
                 body(equalTo("OK"));
 
-        assertThat(writer.toString(), equalTo("Request method:\tPOST\nRequest URI:\thttp://localhost:8080/j_spring_security_check\nProxy:\t\t\t<none>\nRequest params:\t<none>\nQuery params:\t<none>\nForm params:\tj_username=John\n\t\t\t\tj_password=Doe\nPath params:\t<none>\nHeaders:\t\tAccept=*/*\n\t\t\t\tContent-Type=application/x-www-form-urlencoded; charset=" + RestAssured.config().getEncoderConfig().defaultContentCharset() + "\nCookies:\t\t<none>\nMultiparts:\t\t<none>\nBody:\t\t\t<none>\nHTTP/1.1 200 OK\nContent-Type: text/plain;charset=utf-8\nSet-Cookie: jsessionid=1234\nContent-Length: 0\nServer: Jetty(9.3.2.v20150730)\n"));
+        assertThat(writer.toString(), equalTo(String.format("Request method:\tPOST%n" +
+                        "Request URI:\thttp://localhost:8080/j_spring_security_check%n" +
+                        "Proxy:\t\t\t<none>%n" +
+                        "Request params:\t<none>%n" +
+                        "Query params:\t<none>%n" +
+                        "Form params:\tj_username=John%n" +
+                        "\t\t\t\tj_password=Doe%n" +
+                        "Path params:\t<none>%n" +
+                        "Headers:\t\tAccept=*/*%n" +
+                        "\t\t\t\tContent-Type=application/x-www-form-urlencoded; charset=%s%n" +
+                        "Cookies:\t\t<none>%n" +
+                        "Multiparts:\t\t<none>%n" +
+                        "Body:\t\t\t<none>%n" +
+                        "HTTP/1.1 200 OK%n" +
+                        "Content-Type: text/plain;charset=utf-8%n" +
+                        "Set-Cookie: jsessionid=1234%n" +
+                        "Content-Length: 0%n" +
+                        "Server: Jetty(9.3.2.v20150730)%n",
+                RestAssured.config().getEncoderConfig().defaultContentCharset())));
     }
 
     @Test
@@ -182,7 +212,12 @@ public class AuthenticationITest extends WithJetty {
                 statusCode(200).
                 body(equalTo("OK"));
 
-        assertThat(writer.toString(), equalTo("Request params:\t<none>\nQuery params:\t<none>\nForm params:\tj_username=John\n\t\t\t\tj_password=Doe\nPath params:\t<none>\nMultiparts:\t\t<none>\n"));
+        assertThat(writer.toString(), equalTo(String.format("Request params:\t<none>%n" +
+                "Query params:\t<none>%n" +
+                "Form params:\tj_username=John%n" +
+                "\t\t\t\tj_password=Doe%n" +
+                "Path params:\t<none>%n" +
+                "Multiparts:\t\t<none>%n")));
     }
 
     @Test
@@ -198,7 +233,7 @@ public class AuthenticationITest extends WithJetty {
                 statusCode(200).
                 body(equalTo("OK"));
 
-        assertThat(writer.toString(), equalTo("HTTP/1.1 200 OK\n"));
+        assertThat(writer.toString(), equalTo(String.format("HTTP/1.1 200 OK%n")));
     }
 
     @Test

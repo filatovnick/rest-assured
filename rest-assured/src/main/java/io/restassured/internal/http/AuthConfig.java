@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,10 @@ package io.restassured.internal.http;
 import com.github.scribejava.core.builder.api.DefaultApi10a;
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.*;
-import com.github.scribejava.core.model.OAuthConfig;
 import com.github.scribejava.core.oauth.OAuth10aService;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.github.scribejava.core.oauth.OAuthService;
 import io.restassured.authentication.OAuthSignature;
-import io.restassured.http.ContentType;
 import io.restassured.internal.TrustAndKeystoreSpecImpl;
 import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
@@ -261,15 +259,13 @@ public class AuthConfig {
                 OAuthRequest oauthRequest = new OAuthRequest(verb, requestURI.toString(), null);
                 this.service = (OAuth10aService) getOauthService(isOAuth1, addEmptyTokenToBaseString);
 
-                Header contentType = request.getFirstHeader("Content-Type");
-                if (contentType != null) {
-                    if (contentType.getValue().startsWith(ContentType.URLENC.toString())) {
-                        HttpEntity entity = ((EntityEnclosingRequestWrapper) request).getEntity();
-                        if (entity != null) {
-                            List<NameValuePair> params = URLEncodedUtils.parse(entity);
-                            for (NameValuePair param : params) {
-                                oauthRequest.addBodyParameter(param.getName(), param.getValue());
-                            }
+                if (request instanceof EntityEnclosingRequestWrapper) {
+                    HttpEntity entity = ((EntityEnclosingRequestWrapper) request).getEntity();
+                    if (entity != null) {
+                        List<NameValuePair> params = URLEncodedUtils.parse(entity);
+                        for (NameValuePair param : params) {
+                            String value = param.getValue() == null ? "" : param.getValue();
+                            oauthRequest.addBodyParameter(param.getName(), value);
                         }
                     }
                 }

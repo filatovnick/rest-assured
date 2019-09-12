@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,45 +25,50 @@ class MultiPartSpecificationImpl implements MultiPartSpecification {
   private static final String INPUT_STREAM = '<inputstream>'
 
   def content
-  def String controlName
-  def String mimeType
-  def String charset
-  def String fileName
-  def boolean controlNameSpecifiedExplicitly
-  def boolean fileNameSpecifiedExplicitly
+  String controlName
+  String mimeType
+  String charset
+  String fileName
+  boolean controlNameSpecifiedExplicitly
+  boolean fileNameSpecifiedExplicitly
+  Map<String, String> headers
 
-  def Object getContent() {
+  Object getContent() {
     return content
   }
 
-  def String getControlName() {
+  String getControlName() {
     return controlName
   }
 
-  def String getMimeType() {
+  String getMimeType() {
     return mimeType
   }
 
-  def String getCharset() {
+  String getCharset() {
     return charset
   }
 
-  def String getFileName() {
+  String getFileName() {
     return fileName
+  }
+
+  Map<String, String> getHeaders() {
+    Collections.unmodifiableMap(headers)
   }
 
   boolean hasFileName() {
     fileName != null
   }
 
-  def void setFileName(String fileName) {
+  void setFileName(String fileName) {
     this.fileName = StringUtils.trimToNull(fileName)
   }
 
 
-  public String toString() {
+  String toString() {
     return """controlName=${controlName ?: NONE}, mimeType=${mimeType ?: NONE}, charset=${charset ?: NONE}, fileName=${
       fileName ?: NONE
-    }, content=${content instanceof InputStream ? INPUT_STREAM : content}"""
+    }, content=${content instanceof InputStream ? INPUT_STREAM : content}, headers=${headers}"""
   }
 }

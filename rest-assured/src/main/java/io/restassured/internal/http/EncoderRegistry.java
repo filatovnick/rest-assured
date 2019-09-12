@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 
 package io.restassured.internal.http;
 
-import io.restassured.config.EncoderConfig;
-import io.restassured.http.ContentType;
 import groovy.json.JsonBuilder;
 import groovy.lang.Closure;
 import groovy.lang.GString;
 import groovy.lang.Writable;
 import groovy.xml.StreamingMarkupBuilder;
+import io.restassured.config.EncoderConfig;
+import io.restassured.http.ContentType;
+import io.restassured.internal.util.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -109,7 +110,8 @@ public class EncoderRegistry {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("File " + file.getPath() + " not found", e);
             }
-            entity = new InputStreamEntity(fileInputStream, -1);
+            // Set file size, since we already know it at this time. Ref: Issue #988
+            entity = new InputStreamEntity(fileInputStream, file.length());
         } else if (data instanceof byte[]) {
             byte[] out = ((byte[]) data);
             entity = new InputStreamEntity(new ByteArrayInputStream(
@@ -270,7 +272,7 @@ public class EncoderRegistry {
      * @throws UnsupportedEncodingException
      */
     @SuppressWarnings("unchecked")
-    public HttpEntity encodeJSON(Object contentType, Object model) throws UnsupportedEncodingException {
+    public HttpEntity encodeJSON(Object contentType, Object model) throws IOException {
         String contentTypeAsString = contentTypeToString(contentType);
         Object json;
         if (model instanceof Map || model instanceof Collection) {
@@ -283,6 +285,8 @@ public class EncoderRegistry {
             json = model; // assume valid JSON already.
         } else if (model instanceof File) {
             json = toString((File) model, contentTypeAsString);
+        } else if (model instanceof InputStream) {
+            json = IOUtils.toByteArray((InputStream)model); // assume valid JSON.
         } else {
             throw new UnsupportedOperationException("Internal error: Can't encode " + model + " to JSON.");
         }

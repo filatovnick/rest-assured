@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,24 @@ public class MultiPartITest extends WithJetty {
         given().
                 multiPart(new MultiPartSpecBuilder(string).with().charset("UTF-8").and().with().controlName("other").
                         and().with().mimeType("application/vnd.some+json").build()).
+        expect().
+                statusCode(200).
+                body(is(string)).
+        when().
+                post("/multipart/string");
+    }
+
+    @Test
+    public void textUploadingWhenUsingMultiPartSpecificationAndCharsetAndHeaders() throws Exception {
+        // Given
+        final String string = IOUtils.toString(getClass().getResourceAsStream("/car-records.xsd"));
+
+        // When
+        given().
+                multiPart(new MultiPartSpecBuilder(string).with().charset("UTF-8").and().with().controlName("other").
+                        and().with().mimeType("application/vnd.some+json").
+                        and().with().header("X-Header-1", "Value1").
+                        and().with().header("X-Header-2", "Value2").build()).
         expect().
                 statusCode(200).
                 body(is(string)).
@@ -216,7 +234,7 @@ public class MultiPartITest extends WithJetty {
         when().
                 post("/multipart/filename").
         then().
-                body(isEmptyString()).
+                body(emptyString()).
                 statusCode(200);
     }
 
@@ -231,7 +249,7 @@ public class MultiPartITest extends WithJetty {
         when().
                 post("/multipart/filename").
         then().
-                body(isEmptyString()).
+                body(emptyString()).
                 statusCode(200);
     }
 

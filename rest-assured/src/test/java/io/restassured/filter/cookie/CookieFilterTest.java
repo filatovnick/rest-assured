@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package io.restassured.filter.cookie;
 
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.FilterContext;
-import io.restassured.http.Cookie;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.internal.ResponseSpecificationImpl;
@@ -55,12 +54,13 @@ public class CookieFilterTest {
         cookieFilter.filter(reqOriginDomain, response, testFilterContext);
         cookieFilter.filter(reqOriginDomain, response, testFilterContext);
 
-        assertThat(reqOriginDomain.getCookies().size(), Matchers.is(1));
+        assertThat(reqOriginDomain.getCookies().size(), Matchers.is(2));
 
-        for (Cookie cookie : reqOriginDomain.getCookies()) {
-            assertThat(cookie.getName(), Matchers.is("cookieName"));
-            assertThat(cookie.getValue(), Matchers.is("cookieValue"));
-        }
+        assertThat(reqOriginDomain.getCookies().hasCookieWithName("cookieName1"), Matchers.is(true));
+        assertThat(reqOriginDomain.getCookies().getValue("cookieName1"), Matchers.is("cookieValue1"));
+
+        assertThat(reqOriginDomain.getCookies().hasCookieWithName("cookieName2"), Matchers.is(true));
+        assertThat(reqOriginDomain.getCookies().getValue("cookieName2"), Matchers.is("cookieValue2"));
     }
 
     @Test
@@ -78,16 +78,17 @@ public class CookieFilterTest {
     @Test
     public void preserveCookies() {
 
-        reqOriginDomain.cookie("cookieName", "cookieInitialValue");
+        reqOriginDomain.cookie("cookieName1", "cookieInitialValue");
         cookieFilter.filter((FilterableRequestSpecification) given(), response, testFilterContext);
         cookieFilter.filter(reqOriginDomain, response, testFilterContext);
 
-        assertThat(reqOriginDomain.getCookies().size(), Matchers.is(1));
+        assertThat(reqOriginDomain.getCookies().size(), Matchers.is(2));
 
-        for (Cookie cookie : reqOriginDomain.getCookies()) {
-            assertThat(cookie.getName(), Matchers.is("cookieName"));
-            assertThat(cookie.getValue(), Matchers.is("cookieInitialValue"));
-        }
+        assertThat(reqOriginDomain.getCookies().hasCookieWithName("cookieName1"), Matchers.is(true));
+        assertThat(reqOriginDomain.getCookies().getValue("cookieName1"), Matchers.is("cookieInitialValue"));
+
+        assertThat(reqOriginDomain.getCookies().hasCookieWithName("cookieName2"), Matchers.is(true));
+        assertThat(reqOriginDomain.getCookies().getValue("cookieName2"), Matchers.is("cookieValue2"));
     }
 
     private static class TestFilterContext implements FilterContext {
@@ -110,9 +111,11 @@ public class CookieFilterTest {
 
         public Response next(FilterableRequestSpecification request, FilterableResponseSpecification response) {
             RestAssuredResponseImpl restAssuredResponse = new RestAssuredResponseImpl();
-            Header setCookieHeader =
-                    new Header("Set-Cookie", "cookieName=cookieValue; Domain=somedomain.com; Path=/somepath; Secure; HttpOnly");
-            restAssuredResponse.setResponseHeaders(Headers.headers(setCookieHeader));
+            Header setCookieHeader1 =
+                    new Header("Set-Cookie", "cookieName1=cookieValue1; Domain=somedomain.com; Path=/somepath; Secure; HttpOnly");
+            Header setCookieHeader2 =
+                    new Header("Set-Cookie", "cookieName2=cookieValue2; Domain=somedomain.com; Path=/somepath; Secure; HttpOnly");
+            restAssuredResponse.setResponseHeaders(Headers.headers(setCookieHeader1, setCookieHeader2));
             return restAssuredResponse;
         }
     }
